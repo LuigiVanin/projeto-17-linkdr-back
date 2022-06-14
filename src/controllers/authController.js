@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import {userRepository} from '../repositories/userRepository.js'
+import userRepository from '../repositories/userRepository.js'
 
 async function signup(req, res){
     const user = req.body 

@@ -27,4 +27,4 @@ const userRepository = {
     existingUsers
 }
 
-export {userRepository}
+export default userRepository

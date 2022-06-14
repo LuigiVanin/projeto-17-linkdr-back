@@ -5,4 +5,4 @@ import { signup } from "../controllers/authController.js";
 const authRouter = Router()
 authRouter.post('/signup', validateSignup, signup)
 
-export {authRouter}
+export default authRouter

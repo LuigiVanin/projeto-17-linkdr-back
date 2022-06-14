@@ -1,6 +1,6 @@
 //middleware de autenticação
 import { signupSchema } from "../schemas/authSchema.js";
-import {userRepository} from "../repositories/userRepository.js"
+import userRepository from "../repositories/userRepository.js"
 
 
 async function validateSignup(req, res, next){

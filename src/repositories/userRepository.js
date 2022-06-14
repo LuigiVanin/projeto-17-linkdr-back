@@ -22,9 +22,29 @@ async function existingUsers(email){
         [email])
 }
 
+async function getUserByEmail(email){
+    return db.query(
+        `
+        SELECT * from users u
+        WHERE u.email = $1
+        `, 
+        [email])
+}
+
+async function createSession(token, id){
+    return db.query(
+        `
+        INSERT INTO sessions (token, "userId") 
+        VALUES ($1, $2)
+        `,
+         [token, id])
+}
+
 const userRepository = {
     createUser,
-    existingUsers
+    existingUsers,
+    createSession,
+    getUserByEmail
 }
 
 export default userRepository

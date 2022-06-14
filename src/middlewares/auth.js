@@ -1,5 +1,5 @@
 //middleware de autenticação
-import { signupSchema } from "../schemas/authSchema.js";
+import { signupSchema, signinSchema } from "../schemas/authSchema.js";
 import userRepository from "../repositories/userRepository.js"
 
 
@@ -18,4 +18,11 @@ async function validateSignup(req, res, next){
     }
 }
 
-export {validateSignup}
+async function validateSignin(req, res, next){
+    const credentials = req.body // email, password
+    const validation = signinSchema.validate(credentials)
+    if(validation.error) return res.status(422).send(validation.error.details.map(detail => detail.message))
+    next()
+}
+
+export {validateSignup, validateSignin}

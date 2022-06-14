@@ -1,6 +1,6 @@
 //middleware de autenticação
-import db from "../database.js";
 import { signupSchema } from "../schemas/authSchema.js";
+import {userRepository} from "../repositories/userRepository.js"
 
 
 async function validateSignup(req, res, next){
@@ -10,10 +10,7 @@ async function validateSignup(req, res, next){
     if(validation.error) return res.status(422).send(validation.error.details.map(detail => detail.message))
 
     try {
-        const existingUsers = await db.query( `
-                                            SELECT * 
-                                            FROM users 
-                                            WHERE email=$1`, [email])
+        const existingUsers = await userRepository.existingUsers(email)
         if (existingUsers.rowCount > 0) return res.status(422).send("Usuário já existente.")
         next()
     } catch (error) {

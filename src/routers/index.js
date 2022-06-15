@@ -1,7 +1,10 @@
-import  authRouter  from "./authRouter.js";
+import authRouter from "./authRouter.js";
+import hashtagRouter from "./hashtagRouter.js";
 import { Router } from "express";
 
-const router = Router()
-router.use(authRouter)
+const router = Router();
 
-export default router
+router.use(authRouter);
+router.use(hashtagRouter);
+
+export default router;

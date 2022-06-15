@@ -80,19 +80,35 @@ export async function getPosts(req, res) {
 export async function likePost(req, res) {
     const { postId } = req.params;
     const { authorization } = req.headers;
-    const token = authorization.split(' ')[1];
+    const token = authorization?.replace("Bearer ", "").trim();
+        console.log(token);
         if (!token) {
         return res.status(401).json({ error: 'Token não encontrado' });
     }
     try{
-        const user = await db.query(`SELECT users.*, sessions.token FROM users JOIN sessions ON users.id = sessions.user_id 
-        WHERE sessions.token = $1`, [token]); 
-        if (!user.length) {
+        const user = await db.query(`SELECT users.*, sessions.token FROM users JOIN sessions ON users.id = sessions."userId" 
+        WHERE sessions.token = $1`, [token]);
+        console.log(user.rows[0]);
+        if (!user.rows[0]) {
             return res.status(401).json({ error: 'Token inválido' });
         }
-       await db.query(`INSERT INTO likes (userId, postId) VALUES ($1, $2)`, [parseInt(user.rows[0].id), parseInt(postId)]);
-       const result = await db.query(`SELECT COUNT(postId) FROM likes WHERE postId = $1`, [parseInt(postId)]);
-       res.status(200).json({ likes: result.rows[0]});
+
+        const vLike = await db.query(`SELECT * FROM likes WHERE "userId" = $1 AND "postId" = $2`, [parseInt(user.rows[0].id), parseInt(postId)]);
+        console.log(vLike.rowCount);
+        if (vLike.rowCount > 0) {
+            console.log("voce descurtiu o post");
+            await db.query(`DELETE FROM likes WHERE "userId" = $1 AND "postId" = $2`, [parseInt(user.rows[0].id), parseInt(postId)]);
+        }
+        else{
+            console.log("voce curtiu o post");
+            await db.query(`INSERT INTO likes ("userId", "postId") VALUES ($1, $2)`, [parseInt(user.rows[0].id), parseInt(postId)]);
+        }
+         // contador de likes    
+        //  const result = await db.query(`SELECT COUNT("postId") FROM likes WHERE "postId" = $1`, [parseInt(postId)]);
+        //  res.status(200).json({ likes: result.rows[0]});
+        res.status(200).send("Like alterado com sucesso!");
+
+       
     }
     catch(err){
         console.log(err);
@@ -102,11 +118,6 @@ export async function likePost(req, res) {
 
     
 
-}
-
-export async function unlikePost(req, res) {
-    const { postId } = req.params;
-    const { userId } = req.body;
 }
 
 export async function editPost(req, res) {

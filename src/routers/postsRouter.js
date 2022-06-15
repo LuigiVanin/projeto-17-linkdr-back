@@ -11,7 +11,7 @@ postRouter.get("/timeline", getPosts);
 
 //like / unlike
 postRouter.put('/like/:postId', likePost);
-// postRouter.put('/unlike/:postId', unlikePost);
+
 //mostrar curtidas (react-tooltip)
 
 //editPost (focus useRef (react))

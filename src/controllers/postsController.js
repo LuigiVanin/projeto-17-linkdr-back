@@ -90,7 +90,9 @@ export async function likePost(req, res) {
         if (!user.length) {
             return res.status(401).json({ error: 'Token inválido' });
         }
-        //const post = await 
+       await db.query(`INSERT INTO likes (userId, postId) VALUES ($1, $2)`, [parseInt(user.rows[0].id), parseInt(postId)]);
+       const result = await db.query(`SELECT COUNT(postId) FROM likes WHERE postId = $1`, [parseInt(postId)]);
+       res.status(200).json({ likes: result.rows[0]});
     }
     catch(err){
         console.log(err);

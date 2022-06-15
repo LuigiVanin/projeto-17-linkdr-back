@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt'
+import {v4 as uuid} from 'uuid'
 import userRepository from '../repositories/userRepository.js'
 
 async function signup(req, res){
@@ -15,4 +16,24 @@ async function signup(req, res){
     }
 }
 
-export {signup}
+async function signin(req, res){
+    const {email, password} = req.body
+    try {
+        const {rows: users} = await userRepository.getUserByEmail(email)
+        const [user] = users
+        if (!user) return res.sendStatus(401)
+
+        const passwordValidation = bcrypt.compareSync(password, user.password)
+        if(passwordValidation){
+            const token = uuid()
+            await userRepository.createSession(token, user.id)
+            return res.send(token)
+        }
+        else return res.sendStatus(422)
+    } catch (error) {
+        res.sendStatus(500)
+    }
+
+}
+
+export {signup, signin}

@@ -10,4 +10,11 @@ const signupSchema = joi.object(
     }
 )
 
-export {signupSchema}
+const signinSchema = joi.object(
+  {
+    email: joi.string().email().required(),
+    password: joi.string().required()
+  }
+)
+
+export {signupSchema, signinSchema}

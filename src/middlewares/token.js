@@ -3,6 +3,7 @@ import db from '../database.js';
 export async function validToken (req, res, next) {
     const {authorization} = req.headers;
     const token = authorization?.replace('Bearer ', '').trim();
+    if (!token) return res.sendStatus(403);
     console.log(token);
 
     try {

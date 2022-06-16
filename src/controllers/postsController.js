@@ -75,8 +75,6 @@ export async function getPosts(req, res) {
     }
 }
 
-
-
 export async function likePost(req, res) {
     const { postId } = req.params;
     const { authorization } = req.headers;
@@ -103,27 +101,86 @@ export async function likePost(req, res) {
             console.log("voce curtiu o post");
             await db.query(`INSERT INTO likes ("userId", "postId") VALUES ($1, $2)`, [parseInt(user.rows[0].id), parseInt(postId)]);
         }
-         // contador de likes    
-        //  const result = await db.query(`SELECT COUNT("postId") FROM likes WHERE "postId" = $1`, [parseInt(postId)]);
-        //  res.status(200).json({ likes: result.rows[0]});
+        
         res.status(200).send("Like alterado com sucesso!");
-
-       
     }
     catch(err){
         console.log(err);
         return res.sendStatus(500);
     }
-    
-
-    
-
 }
 
-export async function editPost(req, res) {
+export async function getLiked(req, res) {
     const { postId } = req.params;
-    const { userId } = req.body;
+    const { authorization } = req.headers;
+    const token = authorization?.replace("Bearer ", "").trim();
+        console.log(token);
+        if (!token) {
+        return res.status(401).json({ error: 'Token não encontrado' });
+    }
+    try{
+        const user = await db.query(`SELECT users.*, sessions.token FROM users JOIN sessions ON users.id = sessions."userId"
+        WHERE sessions.token = $1`, [token]);
+        console.log(user.rows[0]);
+        if (!user.rows[0]) {
+            return res.status(401).json({ error: 'Token inválido' });
+        }
+
+        const vLike = await db.query(`SELECT * FROM likes WHERE "userId" = $1 AND "postId" = $2`, [parseInt(user.rows[0].id), parseInt(postId)]);
+        console.log(vLike.rowCount);
+        res.status(200).send(vLike.rowCount>0);
+    }
+    catch(err){
+        console.log(err);
+        return res.sendStatus(500);
+    }
 }
+
+
+export async function getLikes(req, res) {
+    const { postId } = req.params;
+    try{ 
+         const result = await db.query(`SELECT COUNT("postId") FROM likes WHERE "postId" = $1`, [parseInt(postId)]);
+         console.log(result.rows[0]);
+         res.status(200).send(result.rows[0]);
+    }
+    catch(err){
+        console.log(err);
+        return res.sendStatus(500);
+    }
+}        
+
+// export async function editPost(req, res) {
+//     const { postId } = req.params;
+//     const { link, description } = req.body;
+//     const { authorization } = req.headers;
+//     const token = authorization?.replace("Bearer ", "").trim();
+//     if (!token) return res.status(401).json({ error: 'Token não encontrado' });
+
+//     try {
+//         const user = await db.query(`SELECT users.*, sessions.token FROM users JOIN sessions ON users.id = sessions."userId" 
+//         WHERE sessions.token = $1`, [token]);
+//         console.log(user.rows[0]);
+//         if (!user.rows[0]) {
+//             return res.status(401).json({ error: 'Token inválido' });
+//         }            
+//             // const postSchema = joi.object({
+//             //     link: joi.string().required(),
+//             //     description: joi.string()
+//             // });
+//             // const validate = postSchema.validate({
+//             //     link: link,
+//             //     description: description
+//             // });
+//             // if (validate.error) return res.sendStatus(400);
+//             await db.query(`UPDATE posts SET link = $1, description = $2 WHERE id = $3`, [link, description, postId]);
+//             return res.status(200).send("Post editado com sucesso!");
+
+//     } catch (err) {
+//         console.log(err);
+//         return res.sendStatus(500);
+//     }
+// }
 
 export async function deletePost(req, res) {
     const { postId } = req.params;

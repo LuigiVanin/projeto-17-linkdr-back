@@ -37,7 +37,8 @@ async function createSession(token, id){
         INSERT INTO sessions (token, "userId") 
         VALUES ($1, $2)
         `,
-         [token, id])
+        [token, id]
+    )
 }
 
 const userRepository = {

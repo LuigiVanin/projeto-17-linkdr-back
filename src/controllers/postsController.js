@@ -57,7 +57,7 @@ export async function getPosts(req, res) {
         const offset = '';
 
         if (req.query.limit) limit = `LIMIT ${req.query.limit}`;
-        if (req.query.offset) offset = `OFFSET ${req.query.offset}`; 
+        if (req.query.offset) offset = `OFFSET ${req.query.offset}`;
 
         const resultPosts = await db.query(`
             SELECT users."imageURL", users.username, posts.link, posts.description, hashtags.name as hashtag

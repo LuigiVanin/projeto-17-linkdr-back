@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createPost, getPosts, likePost, getLiked, getLikes } from "./../controllers/postsController.js";
+import { createPost, getPosts, likePost, getLiked, getLikes, getNames } from "./../controllers/postsController.js";
 
 const postRouter = Router();
 
@@ -13,6 +13,7 @@ postRouter.get('/liked/:postId', getLiked);
 
 //mostrar curtidas (react-tooltip)
 postRouter.get('/likes/:postId', getLikes);
+postRouter.get('/names/:postId', getNames)
 
 //editPost (focus useRef (react))
 // postRouter.put('/posts/:postId', editPost);

@@ -7,6 +7,6 @@ import { validToken } from '../middlewares/token.js';
 const  userRouter = Router();
 
 userRouter.get('/user/:id', validToken, getUser);
-userRouter.get('/user/search/:user', validToken, searchUser);
+userRouter.get('/search/:user', validToken, searchUser);
 
 export default userRouter;

@@ -212,6 +212,30 @@ export async function getNames(req, res) {
 
 export async function deletePost(req, res) {
     const { postId } = req.params;
-    const { userId } = req.body;
+    const { authorization } = req.headers;
+    const token = authorization?.replace("Bearer ", "").trim();
+
+    if (!token) {
+        return res.status(401).json({ error: 'Token não encontrado' });
+    }
+    try{
+        const user = await db.query(`SELECT users.*, sessions.token FROM users JOIN sessions ON users.id = sessions."userId"
+        WHERE sessions.token = $1`, [token]);
+        if (!user.rows[0]) {
+            return res.status(401).json({ error: 'Token inválido' });
+        }
+        const result = await db.query(`SELECT "userId" FROM posts WHERE id = $1`, [parseInt(postId)]);
+        if (parseInt(result.rows[0].userId) !== parseInt(user.rows[0].id)) {
+            return res.status(401).json({ error: 'Você não tem permissão para deletar esse post' });
+        }
+        await db.query('DELETE FROM likes WHERE "postId" = $1', [parseInt(postId)]);
+        // await db.query('DELETE FROM "postsHastags" WHERE "postId" = $1', [parseInt(postId)]);
+        await db.query(`DELETE FROM posts WHERE id = $1`, [parseInt(postId)]);
+        res.status(200).send("Post deletado com sucesso!");
+    }
+    catch(err){
+        console.log(err);
+        return res.sendStatus(500);
+    }
 }
 

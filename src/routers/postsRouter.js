@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { createPost, getPosts, likePost } from "./../controllers/postsController.js";
+import { validateToken } from "../middlewares/validation.js";
 
 const postRouter = Router();
 
 postRouter.post("/post", createPost);
 
-postRouter.get("/timeline", getPosts);
+postRouter.get("/timeline", validateToken, getPosts);
 
 
 

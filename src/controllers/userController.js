@@ -12,8 +12,12 @@ export async function getUser (req, res) {
             LEFT JOIN hashtags h ON ph."hashtagId" = h.id
             WHERE u.id = $1
         `, [id]);
-        console.log(checkUser.rows);
-        res.status(200).send(checkUser.rows);
+        const userById = await db.query(`SELECT username AS name FROM users WHERE id=$1`,[id]);
+        const obj = {
+            name: userById.rows[0].name,
+            posts: checkUser.rows
+        }
+        res.status(200).send(obj);
     } catch (e) {
         console.log(`erro ao buscar usuario: ${e}`);
         res.sendStatus(500);

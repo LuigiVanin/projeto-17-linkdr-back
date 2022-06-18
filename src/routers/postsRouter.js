@@ -1,11 +1,14 @@
 import { Router } from "express";
+import { createPost, getPosts, likePost } from "./../controllers/postsController.js";
+import { validateToken } from "../middlewares/validation.js";
 import { createPost, getPosts, likePost, getLiked, getLikes, getNames, deletePost } from "./../controllers/postsController.js";
+
 
 const postRouter = Router();
 
 postRouter.post("/post", createPost);
 
-postRouter.get("/timeline", getPosts);
+postRouter.get("/timeline", validateToken, getPosts);
 
 //like / unlike
 postRouter.post('/like/:postId', likePost);

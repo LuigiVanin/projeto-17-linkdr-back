@@ -1,5 +1,19 @@
 import db from '../database.js';
 
+import {
+    validToken,
+    checkLike,
+    likePostId,
+    dislikePostId,
+    countLikes,
+    getLikeName,
+    checkAuthor,
+    deleteLikesId,
+    // deleteHashtagId,
+    deletePostId
+
+} from "../repositories/postsRepository.js";
+
 export async function createPost(req, res) {
 
     const {authorization} = req.headers;
@@ -79,27 +93,23 @@ export async function likePost(req, res) {
     const { postId } = req.params;
     const { authorization } = req.headers;
     const token = authorization?.replace("Bearer ", "").trim();
-        
         if (!token) {
         return res.status(401).json({ error: 'Token não encontrado' });
     }
     try{
-        const user = await db.query(`SELECT users.*, sessions.token FROM users JOIN sessions ON users.id = sessions."userId" 
-        WHERE sessions.token = $1`, [token]);
-        
+        const user = await validToken(token);
         if (!user.rows[0]) {
             return res.status(401).json({ error: 'Token inválido' });
         }
-
-        const vLike = await db.query(`SELECT * FROM likes WHERE "userId" = $1 AND "postId" = $2`, [parseInt(user.rows[0].id), parseInt(postId)]);
+        const vLike = await checkLike(parseInt(user.rows[0].id), parseInt(postId))
         
         if (vLike.rowCount > 0) {
             console.log("voce descurtiu o post");
-            await db.query(`DELETE FROM likes WHERE "userId" = $1 AND "postId" = $2`, [parseInt(user.rows[0].id), parseInt(postId)]);
+            await dislikePostId(parseInt(user.rows[0].id), parseInt(postId));
         }
         else{
             console.log("voce curtiu o post");
-            await db.query(`INSERT INTO likes ("userId", "postId") VALUES ($1, $2)`, [parseInt(user.rows[0].id), parseInt(postId)]);
+            await likePostId(parseInt(user.rows[0].id), parseInt(postId));
         }
         
         res.status(200).send(vLike);
@@ -119,14 +129,13 @@ export async function getLiked(req, res) {
         return res.status(401).json({ error: 'Token não encontrado' });
     }
     try{
-        const user = await db.query(`SELECT users.*, sessions.token FROM users JOIN sessions ON users.id = sessions."userId"
-        WHERE sessions.token = $1`, [token]);
+        const user = await validToken(token);
       
         if (!user.rows[0]) {
             return res.status(401).json({ error: 'Token inválido' });
         }
 
-        const vLike = await db.query(`SELECT * FROM likes WHERE "userId" = $1 AND "postId" = $2`, [parseInt(user.rows[0].id), parseInt(postId)]);
+        const vLike = await checkLike(parseInt(user.rows[0].id), parseInt(postId))
        
         res.status(200).send([vLike.rowCount>0,50]);
     }
@@ -139,8 +148,7 @@ export async function getLiked(req, res) {
 export async function getLikes(req, res) {
     const { postId } = req.params;
     try{ 
-         const result = await db.query(`SELECT COUNT("postId") FROM likes WHERE "postId" = $1`, [parseInt(postId)]);
-      
+        const result = await countLikes(parseInt(postId));      
          res.status(200).send(result.rows[0]);
     }
     catch(err){
@@ -158,17 +166,12 @@ export async function getNames(req, res) {
         return res.status(401).json({ error: 'Token não encontrado' });
     }
     try{
-        const user = await db.query(`SELECT users.*, sessions.token FROM users JOIN sessions ON users.id = sessions."userId"
-        WHERE sessions.token = $1`, [token]);
+        const user = await validToken(token);
       
         if (!user.rows[0]) {
             return res.status(401).json({ error: 'Token inválido' });
         }
-
-        const result = await db.query(`SELECT users.username FROM users
-        JOIN likes ON users.id = likes."userId"
-        WHERE likes."postId" = $1`, [parseInt(postId)]);
-    
+        const result = await getLikeName(parseInt(postId));    
         const names = result.rows.map(user => user.username);
       
         let UserLike = false
@@ -199,10 +202,7 @@ export async function getNames(req, res) {
             else if(names.length >= 3 && !UserLike){
                 res.status(200).send(`${names[0]}, ${names[1]} e outras ${names.length - 2} curtiram!`);
             }
-
         }
-
-        // res.status(200).send(result.rows);
 }
     catch(err){
         console.log(err);
@@ -212,6 +212,29 @@ export async function getNames(req, res) {
 
 export async function deletePost(req, res) {
     const { postId } = req.params;
-    const { userId } = req.body;
+    const { authorization } = req.headers;
+    const token = authorization?.replace("Bearer ", "").trim();
+
+    if (!token) {
+        return res.status(401).json({ error: 'Token não encontrado' });
+    }
+    try{
+        const user = await validToken(token);
+        if (!user.rows[0]) {
+            return res.status(401).json({ error: 'Token inválido' });
+        }
+        const result = await checkAuthor(parseInt(postId));
+        if (parseInt(result.rows[0].userId) !== parseInt(user.rows[0].id)) {
+            return res.status(401).json({ error: 'Você não tem permissão para deletar esse post' });
+        }
+        await deleteLikesId(parseInt(postId));
+        // await deleteHashtagId(parseInt(postId));
+        await deletePostId(parseInt(postId));
+        res.status(200).send("Post deletado com sucesso!");
+    }
+    catch(err){
+        console.log(err);
+        return res.sendStatus(500);
+    }
 }
 

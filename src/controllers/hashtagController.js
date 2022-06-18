@@ -1,4 +1,7 @@
-import { getHashtagsByName } from "../repositories/hashtagRepository.js";
+import {
+    getHashtagsByName,
+    getTrendingHashtags,
+} from "../repositories/hashtagRepository.js";
 
 const getHashtag = async (req, res) => {
     let { hashtag } = req.params;
@@ -12,4 +15,14 @@ const getHashtag = async (req, res) => {
     }
 };
 
-export { getHashtag };
+const getTrending = async (_, res) => {
+    try {
+        const { rows: trending } = await getTrendingHashtags();
+        return res.status(200).send(trending);
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
+};
+
+export { getHashtag, getTrending };

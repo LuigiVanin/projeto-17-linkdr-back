@@ -152,13 +152,6 @@ export async function updateUserPost(req, res) {
 
 export async function getPosts(req, res) {
 
-<<<<<<< HEAD
-    // const {authorization} = req.headers;
-    // const token = authorization?.replace("Bearer", "").trim();
-    // console.log(token);
-    // if (!token) return res.sendStatus(403);
-    
-=======
 
     const { user } = res.locals
 
@@ -167,7 +160,6 @@ export async function getPosts(req, res) {
     const token = authorization?.replace("Bearer", "").trim();
     if (!token) return res.sendStatus(403);
     */
->>>>>>> 5ddbed6d8ad3dd4f17029888ea9790a3462818f8
 
     try {
         

@@ -11,6 +11,7 @@ const authentication = async (req, res, next) => {
             .send(validation.error.details.map((i) => i.message));
     }
     token = token.replace("Bearer", "").trim();
+    
     try {
         const user = await userRepository.getUserBySession(token);
         if (!user.rowCount) {
@@ -19,6 +20,7 @@ const authentication = async (req, res, next) => {
         res.locals.user = user.rows[0];
         console.log("AUTENTICADO!");
         next();
+        
     } catch (err) {
         console.log(err);
         if (err.name === "error" && err.table) {

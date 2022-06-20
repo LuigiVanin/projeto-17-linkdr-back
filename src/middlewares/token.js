@@ -13,6 +13,6 @@ export async function validToken (req, res, next) {
         console.log(`erro ao validar token: ${e}`);
         res.sendStatus(500);
     }
-
+    
     next();
 }

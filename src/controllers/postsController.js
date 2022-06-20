@@ -1,8 +1,5 @@
 import db from '../database.js';
-
 import { createPostHashtag, findHashtag, insertHashtag } from '../repositories/hashtagRepository.js';
-import joi from "joi";
-
 
 import {
     validToken,
@@ -15,85 +12,31 @@ import {
     checkAuthor,
     deleteLikesId,
     // deleteHashtagId,
-    deletePostId
+    deletePostId,
+    insertPost,
+    getLastPostId
 
 } from "../repositories/postsRepository.js";
 
 import { formatHashtags } from './hashtagController.js';
 
 export async function createPost(req, res) {
-
-    const { authorization } = req.headers;
-    const token = authorization?.replace("Bearer", "").trim();
-    if (!token) return res.sendStatus(403);
-
-
+    const { user } = res.locals;
     const {link, description} = req.body;
-    const hashtags = description.split("#");
-    console.log(hashtags);
-
     try {
-        const resultSession = await db.query(`SELECT * FROM sessions WHERE token = '${token}'`);
-        const session = resultSession.rows[0];
-        if(!session) return res.send(401);
+        
+        await insertPost(user.id, link, description);
+        const lastPostId = await getLastPostId(user.id);
+        const hashtags = formatHashtags(description);
 
-
-        const resultUser = await db.query(`SELECT * FROM users WHERE id = ${session.userId}`);
-        const user = resultUser.rows[0];
-        if (!user) return res.sendStatus(401);
-
-
-        await db.query(`
-            INSERT INTO posts ("userId", link, description)
-            VALUES ($1, $2, $3)
-        `, [user.id, link, description]);
-
-        const resultPost = await db.query(`
-            SELECT * FROM posts WHERE "userId" = ${session.userId} 
-            ORDER BY id DESC
-            LIMIT 1;
-        `);
-        const post = resultPost.rows[0];
-        console.log(post);
-
-        for (let [index, hashtag] of hashtags.entries()) {
-            if (index !== 0) {
-
-                let resultHashtag = await db.query(`
-                    SELECT * FROM hashtags 
-                    WHERE name = $1
-                `, [hashtag]);
-
-                if (resultHashtag.rowCount === 0) {
-                    await db.query(`
-                        INSERT INTO hashtags (name) VALUES ($1);
-                    `, [hashtag]);
-                    resultHashtag = await db.query(`
-                        SELECT * FROM hashtags WHERE name = $1;
-                    `, [hashtag]);
-                }
-
-                const hashtagId = resultHashtag.rows[0].id;
-                console.log(hashtagId);
-                await db.query(`
-                    INSERT INTO "postsHastags" ("hashtagId", "postId") VALUES ($1, $2);
-                `, [hashtagId, post.id])
+        for (let hashtag of hashtags) {
+            if (hashtag) {
+                await insertHashtag(hashtag);
+                const hashtagId = await findHashtag(hashtag);
+                await createPostHashtag(lastPostId, hashtagId);
             }
         }
-    
-        /*const postSchema = joi.object({
-
-            link: joi.string().required(),
-            description: joi.string()
-        });
-
-        const validate = postSchema.validate({
-            link: link,
-            description: description
-        });
-        if (validate.error) return res.sendStatus(400);*/
-
-        return res.send("tudo ok");
+        return res.sendStatus(201);
 
     } catch (err) {
         console.log(err);
@@ -102,73 +45,56 @@ export async function createPost(req, res) {
 }
 
 export async function updateUserPost(req, res) {
-    const { user } = res.locals
-    const { postId } = req.params
-    const { description } = req.body
+    const { user } = res.locals;
+    const { postId } = req.params;
+    const { description } = req.body;
     
+    console.log(user.id, postId, description);
     try {
-        await updatePost(description, user.id, postId)
-        const hashtags = formatHashtags(description)
+        await updatePost(description, user.id, postId);
+        const hashtags = formatHashtags(description);
         for(let hashtag of hashtags){
             if (hashtag){ 
-                await insertHashtag(hashtag)
-                const hashtagId = await findHashtag(hashtag)
-                await createPostHashtag(postId, hashtagId)
+                await insertHashtag(hashtag);
+                const hashtagId = await findHashtag(hashtag);
+                await createPostHashtag(postId, hashtagId);
             }
            
         }
-        res.sendStatus(200)
-    } catch (error) {
-        res.sendStatus(500)
-        console.log(error)
+        res.sendStatus(200);
+
+    } catch (err) {
+        console.log(err);
+        return res.sendStatus(500);
     }
 }
 
 export async function getPosts(req, res) {
-    const {authorization} = req.headers;
-    const token = authorization?.replace("Bearer", "").trim();
-    if (!token) return res.sendStatus(403);
-
+    const { user } = res.locals;
+    
     try {
-        const resultSession = await db.query(`SELECT * FROM sessions WHERE token = ${token}`);
-        const session = result.rows[0];
-        if(!session) return res.send(401);
-      
-
-        const resultUser = await db.query(`SELECT * FROM users WHERE id = ${session.userId}`);
-        const user = resultUser.rows[0];
-        if (!user) return res.sendStatus(401);
-
         let limit = '';
         let offset = '';
-
         if (req.query.limit) limit = `LIMIT ${req.query.limit}`;
         if (req.query.offset) offset = `OFFSET ${req.query.offset}`;
-        /*
+
         const resultPosts = await db.query(`
-            SELECT users."imageUrl", users.username, posts.link, posts.description, hashtags.name as hashtag
+            SELECT users.id, users."imageUrl", users.username, posts."userId" as "ownerId", posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
             FROM posts
             JOIN users ON posts."userId" = users.id
-            JOIN "postsHashtags" ON posts.id = "postsHashtags"."postId"
-            JOIN hashtags ON "postsHashtags"."hashtagId" = hashtags.id
+            LEFT JOIN likes ON likes."postId" = posts.id
+            GROUP BY users.id, users."imageUrl", users.username, "ownerId", posts.link, posts.description, "postCreationDate"
+            ORDER BY "postCreationDate" DESC  
             ${limit}
             ${offset}
-        `);  
-        */
-
-
-        const resultPosts = await db.query(`
-        SELECT users."imageUrl", users.username, posts."userId" as "ownerId", posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
-        FROM posts
-        JOIN users ON posts."userId" = users.id
-        LEFT JOIN likes 
-        ON likes."postId" = posts.id
-        GROUP BY users."imageUrl", users.username, "ownerId", posts.link, posts.description, "postCreationDate"
-        ORDER BY "postCreationDate" DESC  
-        ${limit}
-        ${offset}
         `);
-        return res.send(resultPosts.rows.reverse());
+
+        const result = resultPosts.rows.map((post)=>{
+            console.log(post)
+            return {...post, postId: parseInt(post.id), isOwner: parseInt (post.ownerId ) === user.id}
+        })
+
+        return res.send(result.reverse());
 
     } catch (err) {
         console.log(err);

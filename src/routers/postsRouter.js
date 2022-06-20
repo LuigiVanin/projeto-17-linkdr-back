@@ -1,4 +1,5 @@
 import { Router } from "express";
+import validatePost from "../middlewares/postMiddlewares.js";
 import { validateToken } from "../middlewares/validation.js";
 import {
     createPost,
@@ -13,9 +14,9 @@ import {
 
 const postRouter = Router();
 
-postRouter.post("/post", createPost);
+postRouter.post("/post", validateToken, validatePost, createPost);
 
-postRouter.put('/post/:postId', validateToken, updateUserPost)
+postRouter.put('/post/:postId', validateToken, updateUserPost);
 
 postRouter.get("/timeline", validateToken, getPosts);
 

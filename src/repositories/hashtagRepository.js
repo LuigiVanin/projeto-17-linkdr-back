@@ -29,4 +29,34 @@ const getTrendingHashtags = async () => {
     );
 };
 
-export { getHashtagsByName, getTrendingHashtags };
+const insertHashtag = async(hashtag) => {
+    return db.query(
+        `
+        INSERT INTO hashtags (name)
+        SELECT $1
+        WHERE NOT EXISTS (SELECT * FROM hashtags WHERE name = $1 )
+
+        `, 
+        [hashtag]
+    )
+}
+
+const findHashtag = async (hashtag) =>{
+    console.log(hashtag)
+    const query = await db.query(
+        `
+                    SELECT * FROM hashtags 
+                    WHERE name = $1
+                `, [hashtag]
+    )
+        console.log(query.rows[0])
+    return query.rows[0].id
+}
+
+const createPostHashtag = async(postId, hashtagId) => {
+    return db.query(`
+    INSERT INTO "postsHashtags" ("hashtagId", "postId") VALUES ($1, $2);
+`, [hashtagId, postId])
+}
+
+export { getHashtagsByName, getTrendingHashtags, insertHashtag, findHashtag, createPostHashtag };

@@ -27,11 +27,12 @@ const getTrending = async (_, res) => {
 };
 
 function formatHashtags(text){
-    const regex = /((?:^|\s)(?:#[a-z\d-]+))/gi
+    const regex = /((?:^|\s)(?:#[a-z\d -]+))/gi
     const splittedText = text.split(regex)
 
     return splittedText.filter(Boolean).map((string)=>{
-        if(string.includes('#')) return string.replace("#", "").trim()
+        if(string.includes('#')) return string.replace("#", "").replaceAll(' ', '')
+        //hashtags devem estar no final da frase 
     })
 }
 

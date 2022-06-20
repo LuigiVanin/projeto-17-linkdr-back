@@ -42,11 +42,11 @@ export async function createPost(req, res) {
         if (!user) return res.sendStatus(401);
 
 
-        const postSchema = joi.object({
-        await db.query(`
-            INSERT INTO posts ("userId", link, description) 
-            VALUES ($1, $2, $3)
-        `, [user.id, link, description]);
+        // const postSchema = joi.object({
+        // await db.query(`
+        //     INSERT INTO posts ("userId", link, description) 
+        //     VALUES ($1, $2, $3)
+        // `, [user.id, link, description]);
 
         const resultPost = await db.query(`
             SELECT * FROM posts WHERE "userId" = ${session.userId} 
@@ -126,18 +126,19 @@ export async function updateUserPost(req, res) {
 
 export async function getPosts(req, res) {
 
-    /*
-    const {authorization} = req.headers;
-    const token = authorization?.replace("Bearer", "").trim();
-    if (!token) return res.sendStatus(403);
-    */
+    // const {authorization} = req.headers;
+    // const token = authorization?.replace("Bearer", "").trim();
+    // console.log(token);
+    // if (!token) return res.sendStatus(403);
+    
 
     try {
+        
         /*
         const resultSession = await db.query(`SELECT * FROM sessions WHERE token = ${token}`);
+        console.log(resultSession.rows[0]);
         const session = result.rows[0];
         if(!session) return res.send(401);
-      
 
         const resultUser = await db.query(`SELECT * FROM users WHERE id = ${session.userId}`);
         const user = resultUser.rows[0];
@@ -186,7 +187,6 @@ export async function getPosts(req, res) {
 
 export async function likePost(req, res) {
     const { postId } = req.params;
-    console.log(postId);
     const { authorization } = req.headers;
     const token = authorization?.replace("Bearer ", "").trim();
     if (!token) {

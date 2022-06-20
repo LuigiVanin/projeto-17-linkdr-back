@@ -1,4 +1,5 @@
 import db from '../database.js';
+import { createPostHashtag, findHashtag, insertHashtag } from '../repositories/hashtagRepository.js';
 
 import {
     validToken,
@@ -14,6 +15,7 @@ import {
     deletePostId
 
 } from "../repositories/postsRepository.js";
+import { formatHashtags } from './hashtagController.js';
 
 export async function createPost(req, res) {
 
@@ -56,9 +58,18 @@ export async function updateUserPost(req, res) {
     const { user } = res.locals
     const { postId } = req.params
     const { description } = req.body
-
+    
     try {
         await updatePost(description, user.id, postId)
+        const hashtags = formatHashtags(description)
+        for(let hashtag of hashtags){
+            if (hashtag){ 
+                await insertHashtag(hashtag)
+                const hashtagId = await findHashtag(hashtag)
+                await createPostHashtag(postId, hashtagId)
+            }
+           
+        }
         res.sendStatus(200)
     } catch (error) {
         res.sendStatus(500)

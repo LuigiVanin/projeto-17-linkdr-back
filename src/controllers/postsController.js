@@ -133,12 +133,12 @@ export async function getPosts(req, res) {
 
 
         const resultPosts = await db.query(`
-        SELECT users."imageUrl", users.username, posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
+        SELECT users."imageUrl", users.username, posts."userId" as "ownerId", posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
         FROM posts
         JOIN users ON posts."userId" = users.id
         LEFT JOIN likes 
         ON likes."postId" = posts.id
-        GROUP BY users."imageUrl", users.username, posts.link, posts.description, "postCreationDate"
+        GROUP BY users."imageUrl", users.username, "ownerId", posts.link, posts.description, "postCreationDate"
         ORDER BY "postCreationDate" DESC  
         ${limit}
         ${offset}

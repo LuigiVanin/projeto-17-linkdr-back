@@ -1,4 +1,4 @@
-import getMetaData from "metadata-scraper"
+import getMetaData from "metadata-scraper";
 
 async function getUrlMetadata(req,res){
     const {url} = req.body

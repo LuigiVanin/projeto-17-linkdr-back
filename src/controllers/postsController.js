@@ -82,7 +82,7 @@ export async function createPost(req, res) {
             description: description
         });
         if (validate.error) return res.sendStatus(400);*/
-        
+
         return res.send("tudo ok");
 
     } catch (err) {
@@ -93,33 +93,55 @@ export async function createPost(req, res) {
 
 export async function getPosts(req, res) {
 
+    /*
     const {authorization} = req.headers;
     const token = authorization?.replace("Bearer", "").trim();
     if (!token) return res.sendStatus(403);
+    */
 
     try {
+        /*
         const resultSession = await db.query(`SELECT * FROM sessions WHERE token = ${token}`);
         const session = result.rows[0];
         if(!session) return res.send(401);
+      
 
         const resultUser = await db.query(`SELECT * FROM users WHERE id = ${session.userId}`);
         const user = resultUser.rows[0];
         if (!user) return res.sendStatus(401);
+        */
 
-        const limit = '';
-        const offset = '';
+        let limit = '';
+        let offset = '';
 
         if (req.query.limit) limit = `LIMIT ${req.query.limit}`;
         if (req.query.offset) offset = `OFFSET ${req.query.offset}`;
+        /*
+
 
         const resultPosts = await db.query(`
-            SELECT users."imageURL", users.username, posts.link, posts.description, hashtags.name as hashtag
+            SELECT users."imageUrl", users.username, posts.link, posts.description, hashtags.name as hashtag
             FROM posts
-            JOIN users ON post."userId" = users.id
-            JOIN postsHashtags ON posts.id = postsHashtags."postId"
-            JOIN hashtags ON postsHashtags."hashtagId" = hashtags.id
+            JOIN users ON posts."userId" = users.id
+            JOIN "postsHashtags" ON posts.id = "postsHashtags"."postId"
+            JOIN hashtags ON "postsHashtags"."hashtagId" = hashtags.id
             ${limit}
             ${offset}
+        `);
+        
+        */
+
+
+        const resultPosts = await db.query(`
+        SELECT users."imageUrl", users.username, posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
+        FROM posts
+        JOIN users ON posts."userId" = users.id
+        LEFT JOIN likes 
+        ON likes."postId" = posts.id
+        GROUP BY users."imageUrl", users.username, posts.link, posts.description, "postCreationDate"
+        ORDER BY "postCreationDate" DESC  
+        ${limit}
+        ${offset}
         `);
         return res.send(resultPosts.rows.reverse());
 

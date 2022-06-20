@@ -1,6 +1,6 @@
 import { signupSchema, signinSchema } from "../schemas/authSchema.js";
 import userRepository from "../repositories/userRepository.js"
-
+import db from '../database.js';
 
 async function validateSignup(req, res, next){
     const user = req.body // username, email, password, imageUrl
@@ -24,4 +24,25 @@ async function validateSignin(req, res, next){
     next()
 }
 
-export {validateSignup, validateSignin}
+async function validateToken(req, res, next){
+    const authorization  = req.headers.authorization
+    const token = authorization?.replace("Bearer ", "")
+    if(!token) return res.status(403).send("Token não enviado")
+
+    const { rows: sessions } = await db.query(`SELECT * 
+                                                         FROM sessions 
+                                                         WHERE token=$1`, [token])
+    const [session] = sessions
+    if (!session) return res.status(401).send("Sessão de usuário não encontrada")
+    
+    const { rows: users } = await db.query(`SELECT * 
+                                                      FROM users 
+                                                      WHERE id=$1`, [session.userId])
+    const [user] = users
+    if (!user) return res.status(401).send("Usuário não encontrado")
+
+    res.locals.user = user
+    next()
+
+}
+export {validateSignup, validateSignin, validateToken}

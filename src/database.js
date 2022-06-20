@@ -15,8 +15,8 @@ if(process.env.MODE === "PROD") {
 }
 
 
-const db = new Pool(configDatabase);
 
+const db = new Pool(configDatabase);
 
 // conexao db para teste local:-----------------
 // const db = new Pool({

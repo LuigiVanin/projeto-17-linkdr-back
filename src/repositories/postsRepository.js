@@ -10,6 +10,18 @@ const validToken = async (token) => {
     );
 }
 
+const updatePost = async (description, userId, postId) => {
+    
+    return db.query(
+        `
+        UPDATE posts 
+        SET description = $1
+        WHERE posts.id = $2 AND posts."userId" = $3
+
+        `, 
+        [description, postId, userId])
+}
+
 const checkLike = async (userId, postId) => {
     return db.query(
         `
@@ -94,4 +106,4 @@ const deletePostId = async (postId) => {
 
 
 
-export { validToken, checkLike, likePostId, dislikePostId, countLikes, getLikeName, checkAuthor, deleteLikesId, deleteHashtagId, deletePostId };
+export { validToken, updatePost, checkLike, likePostId, dislikePostId, countLikes, getLikeName, checkAuthor, deleteLikesId, deleteHashtagId, deletePostId };

@@ -1,6 +1,7 @@
 import {
     getHashtagsByName,
     getTrendingHashtags,
+    insertHashtag,
 } from "../repositories/hashtagRepository.js";
 
 const getHashtag = async (req, res) => {
@@ -25,4 +26,13 @@ const getTrending = async (_, res) => {
     }
 };
 
-export { getHashtag, getTrending };
+function formatHashtags(text){
+    const regex = /((?:^|\s)(?:#[a-z\d-]+))/gi
+    const splittedText = text.split(regex)
+
+    return splittedText.filter(Boolean).map((string)=>{
+        if(string.includes('#')) return string.replace("#", "").trim()
+    })
+}
+
+export { getHashtag, getTrending, formatHashtags };

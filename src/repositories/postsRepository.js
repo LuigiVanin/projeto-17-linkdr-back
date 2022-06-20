@@ -10,6 +10,25 @@ const validToken = async (token) => {
     );
 }
 
+const insertPost = async (userId, link, description) =>{
+    return db.query(
+        `
+        INSERT INTO posts ("userId", link, description) 
+        VALUES ($1, $2, $3)
+        `, 
+        [userId, link, description]);
+}
+
+const getLastPostId = async (userId) =>{
+    const query = await db.query(
+        `
+        SELECT * FROM posts WHERE "userId" = $1
+        ORDER BY id DESC
+        LIMIT 1;
+        `, [userId])
+    return query.rows[0].id
+}
+
 const updatePost = async (description, userId, postId) => {
     
     return db.query(
@@ -106,4 +125,4 @@ const deletePostId = async (postId) => {
 
 
 
-export { validToken, updatePost, checkLike, likePostId, dislikePostId, countLikes, getLikeName, checkAuthor, deleteLikesId, deleteHashtagId, deletePostId };
+export { validToken, insertPost, getLastPostId, updatePost, checkLike, likePostId, dislikePostId, countLikes, getLikeName, checkAuthor, deleteLikesId, deleteHashtagId, deletePostId };

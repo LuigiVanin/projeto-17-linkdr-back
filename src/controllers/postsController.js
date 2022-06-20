@@ -15,13 +15,37 @@ import {
     checkAuthor,
     deleteLikesId,
     // deleteHashtagId,
-    deletePostId
+    deletePostId,
+    insertPost,
+    getLastPostId
 
 } from "../repositories/postsRepository.js";
 import { formatHashtags } from './hashtagController.js';
 
 export async function createPost(req, res) {
+    const { user } = res.locals
+    const {link, description} = req.body
+    try {
+        
+        await insertPost(user.id, link, description)
+        const lastPostId = await getLastPostId(user.id)
+        const hashtags = formatHashtags(description)
 
+        for(let hashtag of hashtags){
+            if (hashtag){ 
+                await insertHashtag(hashtag)
+                const hashtagId = await findHashtag(hashtag)
+                await createPostHashtag(lastPostId, hashtagId)
+            }
+        }
+        res.sendStatus(201)
+    } catch (error) {
+        res.sendStatus(500)
+        console.log(error)
+    }
+
+   /*
+   
     const { authorization } = req.headers;
     const token = authorization?.replace("Bearer", "").trim();
     if (!token) return res.sendStatus(403);
@@ -91,7 +115,7 @@ export async function createPost(req, res) {
             link: link,
             description: description
         });
-        if (validate.error) return res.sendStatus(400);*/
+        if (validate.error) return res.sendStatus(400);
 
         return res.send("tudo ok");
 
@@ -99,6 +123,7 @@ export async function createPost(req, res) {
         console.log(err);
         return res.sendStatus(500);
     }
+   */
 }
 
 export async function updateUserPost(req, res) {
@@ -106,6 +131,7 @@ export async function updateUserPost(req, res) {
     const { postId } = req.params
     const { description } = req.body
     
+    console.log(user.id, postId, description)
     try {
         await updatePost(description, user.id, postId)
         const hashtags = formatHashtags(description)
@@ -126,11 +152,22 @@ export async function updateUserPost(req, res) {
 
 export async function getPosts(req, res) {
 
+<<<<<<< HEAD
     // const {authorization} = req.headers;
     // const token = authorization?.replace("Bearer", "").trim();
     // console.log(token);
     // if (!token) return res.sendStatus(403);
     
+=======
+
+    const { user } = res.locals
+
+    /*
+    const {authorization} = req.headers;
+    const token = authorization?.replace("Bearer", "").trim();
+    if (!token) return res.sendStatus(403);
+    */
+>>>>>>> 5ddbed6d8ad3dd4f17029888ea9790a3462818f8
 
     try {
         
@@ -167,17 +204,31 @@ export async function getPosts(req, res) {
 
 
         const resultPosts = await db.query(`
+<<<<<<< HEAD
         SELECT users."imageUrl", users.username, posts.id as "postsId", posts."userId" as "ownerId", posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
+=======
+        SELECT users.id, users."imageUrl", users.username, posts."userId" as "ownerId", posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
+>>>>>>> 5ddbed6d8ad3dd4f17029888ea9790a3462818f8
         FROM posts
         JOIN users ON posts."userId" = users.id
         LEFT JOIN likes 
         ON likes."postId" = posts.id
+<<<<<<< HEAD
         GROUP BY users."imageUrl", users.username, "postsId", "ownerId", posts.link, posts.description, "postCreationDate"
+=======
+        GROUP BY users.id, users."imageUrl", users.username, "ownerId", posts.link, posts.description, "postCreationDate"
+>>>>>>> 5ddbed6d8ad3dd4f17029888ea9790a3462818f8
         ORDER BY "postCreationDate" DESC  
         ${limit}
         ${offset}
         `);
-        return res.send(resultPosts.rows.reverse());
+
+        const result = resultPosts.rows.map((post)=>{
+            console.log(post)
+            return {...post, postId: parseInt(post.id), isOwner: parseInt (post.ownerId ) === user.id}
+        })
+
+        return res.send(result.reverse());
 
     } catch (err) {
         console.log(err);

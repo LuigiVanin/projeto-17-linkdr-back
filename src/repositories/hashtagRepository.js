@@ -49,7 +49,6 @@ const findHashtag = async (hashtag) =>{
                     WHERE name = $1
                 `, [hashtag]
     )
-        console.log(query.rows[0])
     return query.rows[0].id
 }
 

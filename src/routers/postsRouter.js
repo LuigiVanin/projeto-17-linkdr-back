@@ -13,7 +13,7 @@ import {
 
 const postRouter = Router();
 
-postRouter.post("/post", createPost);
+postRouter.post("/post", validateToken, createPost);
 
 postRouter.put('/post/:postId', validateToken, updateUserPost)
 

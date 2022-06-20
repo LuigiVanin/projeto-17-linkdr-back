@@ -133,13 +133,13 @@ export async function getPosts(req, res) {
 
 
         const resultPosts = await db.query(`
-        SELECT users."imageUrl", users.username, posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
+        SELECT users."imageUrl", users.username, posts.id as "postsId", posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
         FROM posts
         JOIN users ON posts."userId" = users.id
         LEFT JOIN likes 
         ON likes."postId" = posts.id
-        GROUP BY users."imageUrl", users.username, posts.link, posts.description, "postCreationDate"
-        ORDER BY "postCreationDate" DESC  
+        GROUP BY users."imageUrl", users.username, "postsId", posts.link, posts.description, "postCreationDate"
+        ORDER BY "postCreationDate" DESC 
         ${limit}
         ${offset}
         `);
@@ -153,6 +153,7 @@ export async function getPosts(req, res) {
 
 export async function likePost(req, res) {
     const { postId } = req.params;
+    console.log(postId);
     const { authorization } = req.headers;
     const token = authorization?.replace("Bearer ", "").trim();
         if (!token) {

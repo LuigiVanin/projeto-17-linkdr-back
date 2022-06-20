@@ -42,7 +42,6 @@ const insertHashtag = async(hashtag) => {
 }
 
 const findHashtag = async (hashtag) =>{
-    console.log(hashtag)
     const query = await db.query(
         `
                     SELECT * FROM hashtags 

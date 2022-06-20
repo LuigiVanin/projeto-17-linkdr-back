@@ -2,6 +2,7 @@ import { Router } from "express";
 import { validateToken } from "../middlewares/validation.js";
 import {
     createPost,
+    updateUserPost,
     getPosts,
     likePost,
     getLiked,
@@ -13,6 +14,8 @@ import {
 const postRouter = Router();
 
 postRouter.post("/post", createPost);
+
+postRouter.put('/post/:postId', validateToken, updateUserPost)
 
 postRouter.get("/timeline", validateToken, getPosts);
 

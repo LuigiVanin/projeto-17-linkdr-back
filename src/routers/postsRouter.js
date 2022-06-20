@@ -15,7 +15,7 @@ import {
 
 const postRouter = Router();
 
-postRouter.post("/post", authentication, createPost);
+postRouter.post("/post", authentication, validatePost, createPost);
 
 postRouter.put("/post/:postId", authentication, updateUserPost);
 

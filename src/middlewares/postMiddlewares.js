@@ -1,4 +1,4 @@
-import postSchema from "../schemas/postSchema";
+import postSchema from "../schemas/postSchema.js";
 
 function validatePost(req, res, next) {
 

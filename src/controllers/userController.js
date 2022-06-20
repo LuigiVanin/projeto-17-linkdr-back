@@ -8,7 +8,7 @@ export async function getUser (req, res) {
             SELECT u."imageUrl", u.username, p.link, p.description, h.name AS hashtag
             FROM posts p
             JOIN users u ON p."userId" = u.id
-            LEFT JOIN postsHashtags ph ON p.id = ph."postId"
+            LEFT JOIN "postsHashtags" ph ON p.id = ph."postId"
             LEFT JOIN hashtags h ON ph."hashtagId" = h.id
             WHERE u.id = $1
         `, [id]);

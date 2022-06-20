@@ -59,7 +59,6 @@ export async function updateUserPost(req, res) {
                 const hashtagId = await findHashtag(hashtag);
                 await createPostHashtag(postId, hashtagId);
             }
-           
         }
         res.sendStatus(200);
 
@@ -79,19 +78,19 @@ export async function getPosts(req, res) {
         if (req.query.offset) offset = `OFFSET ${req.query.offset}`;
 
         const resultPosts = await db.query(`
-            SELECT users.id, users."imageUrl", users.username, posts."userId" as "ownerId", posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
+            SELECT posts.id as "postId", users.id as "userId", users."imageUrl", users.username, posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
             FROM posts
             JOIN users ON posts."userId" = users.id
             LEFT JOIN likes ON likes."postId" = posts.id
-            GROUP BY users.id, users."imageUrl", users.username, "ownerId", posts.link, posts.description, "postCreationDate"
-            ORDER BY "postCreationDate" DESC  
+            GROUP BY users.id, users.username, posts.id, "postCreationDate"
+            ORDER BY "postCreationDate" DESC
             ${limit}
             ${offset}
         `);
 
         const result = resultPosts.rows.map((post)=>{
             console.log(post)
-            return {...post, postId: parseInt(post.id), isOwner: parseInt (post.ownerId ) === user.id}
+            return {...post, isOwner: parseInt(post.userId) === user.id}
         })
 
         return res.send(result.reverse());

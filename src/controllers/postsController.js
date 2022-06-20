@@ -35,7 +35,7 @@ export async function createPost(req, res) {
         if (!user) return res.sendStatus(401);
 
         await db.query(`
-            INSERT INTO posts ("userId", link, description) 
+            INSERT INTO posts ("userId", link, description)
             VALUES ($1, $2, $3)
         `, [user.id, link, description]);
 
@@ -92,15 +92,11 @@ export async function createPost(req, res) {
 }
 
 export async function getPosts(req, res) {
-
-    /*
     const {authorization} = req.headers;
     const token = authorization?.replace("Bearer", "").trim();
     if (!token) return res.sendStatus(403);
-    */
 
     try {
-        /*
         const resultSession = await db.query(`SELECT * FROM sessions WHERE token = ${token}`);
         const session = result.rows[0];
         if(!session) return res.send(401);
@@ -109,7 +105,6 @@ export async function getPosts(req, res) {
         const resultUser = await db.query(`SELECT * FROM users WHERE id = ${session.userId}`);
         const user = resultUser.rows[0];
         if (!user) return res.sendStatus(401);
-        */
 
         let limit = '';
         let offset = '';
@@ -117,8 +112,6 @@ export async function getPosts(req, res) {
         if (req.query.limit) limit = `LIMIT ${req.query.limit}`;
         if (req.query.offset) offset = `OFFSET ${req.query.offset}`;
         /*
-
-
         const resultPosts = await db.query(`
             SELECT users."imageUrl", users.username, posts.link, posts.description, hashtags.name as hashtag
             FROM posts
@@ -127,8 +120,7 @@ export async function getPosts(req, res) {
             JOIN hashtags ON "postsHashtags"."hashtagId" = hashtags.id
             ${limit}
             ${offset}
-        `);
-        
+        `);  
         */
 
 
@@ -211,7 +203,7 @@ export async function getLikes(req, res) {
     const { postId } = req.params;
     try{ 
         const result = await countLikes(parseInt(postId));      
-         res.status(200).send(result.rows[0]);
+        res.status(200).send(result.rows[0]);
     }
     catch(err){
         console.log(err);

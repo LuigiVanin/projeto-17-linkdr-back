@@ -12,7 +12,7 @@ const getHashtagsByName = async (hashtagName) => {
         WHERE h.name = $1
         GROUP BY p.id, p.description, p.link, u.username, u.email, u."imageUrl", u.id
     `,
-        [`#${hashtagName}`]
+        [hashtagName]
     );
 };
 

@@ -1,7 +1,10 @@
+// Rota de URL
+
 import { Router } from "express";   
-import getUrlMetadata from "../controllers/urlController.js"
+import getUrlMetadata from "../controllers/urlController.js";
 
-const urlRouter = Router()
-urlRouter.post('/getMetaData', getUrlMetadata)
+const urlRouter = Router();
 
-export default urlRouter
+urlRouter.post('/getMetaData', getUrlMetadata);
+
+export default urlRouter;

@@ -1,25 +1,19 @@
+// Rota de posts
+
 import { Router } from "express";
-import authentication from "../middlewares/authentication.js";
+import { authentication } from "../middlewares/authMiddleware.js";
 import validatePost from "../middlewares/postMiddlewares.js";
-import { validateToken } from "../middlewares/validation.js";
-import {
-    createPost,
-    updateUserPost,
-    getPosts,
-    likePost,
-    getLiked,
-    getLikes,
-    getNames,
-    deletePost,
+import { 
+    createPost, updateUserPost, getPosts, likePost, getLiked, getLikes, getNames, deletePost 
 } from "./../controllers/postsController.js";
 
 const postRouter = Router();
+postRouter.use(authentication);
 
-postRouter.post("/post", authentication, createPost);
+postRouter.post("/post", validatePost, createPost);
+postRouter.get("/timeline", getPosts);
 
-postRouter.put("/post/:postId", authentication, updateUserPost);
-
-postRouter.get("/timeline", authentication, getPosts);
+postRouter.put("/post/:postId", updateUserPost);
 
 //like / unlike
 postRouter.post("/like/:postId", likePost);

@@ -1,7 +1,5 @@
 import {
-    getHashtagsByName,
-    getTrendingHashtags,
-    insertHashtag,
+    getHashtagsByName, getTrendingHashtags, insertHashtag
 } from "../repositories/hashtagRepository.js";
 
 const getHashtag = async (req, res) => {

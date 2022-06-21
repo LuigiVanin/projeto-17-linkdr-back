@@ -14,5 +14,4 @@ async function getUrlMetadata(req,res){
     }
 }
 
-
-export default getUrlMetadata
+export default getUrlMetadata;

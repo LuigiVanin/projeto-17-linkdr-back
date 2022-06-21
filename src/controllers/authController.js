@@ -1,41 +1,60 @@
-import bcrypt from 'bcrypt'
-import {v4 as uuid} from 'uuid'
-import userRepository from '../repositories/userRepository.js'
+import db from '../database.js';
+import bcrypt from 'bcrypt';
+import {v4 as uuid} from 'uuid';
+import userRepository from '../repositories/userRepository.js';
 
-async function signup(req, res){
+async function signup(req, res) {
     const user = req.body 
-    const {username, email, password, imageUrl} = user
-    try {
-        const passwordHash = bcrypt.hashSync(password, 10)
+    const { username, email, password, imageUrl } = user;
 
-        await userRepository.createUser(username, email, passwordHash, imageUrl)
-        res.sendStatus(201)
+    try {
+        const passwordHash = bcrypt.hashSync(password, 10);
+        await userRepository.createUser(username, email, passwordHash, imageUrl);
+        return res.sendStatus(201);
+
     } catch (error) {
-        console.log(error)
-        return res.sendStatus(500)
+        console.log(error);
+        return res.sendStatus(500);
     }
 }
 
-async function signin(req, res){
-    const {email, password} = req.body
+async function signin(req, res) {
+    const {email, password} = req.body;
+
     try {
-        const {rows: users} = await userRepository.getUserByEmail(email)
-        const [user] = users
-        if (!user) return res.sendStatus(401)
+        const {rows: users} = await userRepository.getUserByEmail(email);
+        const [user] = users;
+        if (!user) return res.sendStatus(404);
 
         const passwordValidation = bcrypt.compareSync(password, user.password)
-        if(passwordValidation){
-            const token = uuid()
-            await userRepository.createSession(token, user.id)
-            return res.send(
-                {token}
-            )
+        if (passwordValidation) {
+            const token = uuid();
+            await userRepository.createSession(token, user.id);
+            return res.send({token});
         }
-        else return res.sendStatus(422)
-    } catch (error) {
-        res.sendStatus(500)
-    }
+        else return res.sendStatus(422);
 
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
+    }
 }
 
-export {signup, signin}
+async function logout(req, res) {
+    const {authorization} = req.headers;
+    const token = authorization?.replace("Bearer", "").trim();
+    if (!token) return res.sendStatus(403);
+
+    try {
+        const session = await db.query(`
+            DELETE FROM sessions WHERE token = '${token}'
+        `);
+        return res.status(200).send(session);
+
+    } catch(err) {
+        console.log(err);
+        return res.sendStatus(500);
+    }
+}
+
+export { signup, signin, logout };

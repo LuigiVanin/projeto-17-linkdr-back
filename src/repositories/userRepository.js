@@ -44,13 +44,11 @@ async function createSession(token, id) {
 }
 
 async function getUserBySession(token) {
-    return db.query(
-        `
-    SELECT users.username, users.id FROM sessions
+    return db.query(`
+    SELECT * FROM sessions
     JOIN users ON sessions."userId" = users.id
     WHERE sessions.token = $1;
-    `,
-        [token]
+    `,[token]
     );
 }
 

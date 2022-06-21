@@ -1,30 +1,18 @@
 import db from '../database.js';
 import { createPostHashtag, findHashtag, insertHashtag } from '../repositories/hashtagRepository.js';
-
 import {
-    validToken,
-    updatePost,
-    checkLike,
-    likePostId,
-    dislikePostId,
-    countLikes,
-    getLikeName,
-    checkAuthor,
-    deleteLikesId,
-    // deleteHashtagId,
-    deletePostId,
-    insertPost,
-    getLastPostId
-
+    validToken, updatePost, checkLike, likePostId, dislikePostId, countLikes, getLikeName, checkAuthor,
+    deleteLikesId, //deleteHashtagId, 
+    deletePostId, insertPost, getLastPostId
 } from "../repositories/postsRepository.js";
-
 import { formatHashtags } from './hashtagController.js';
 
 export async function createPost(req, res) {
+
     const { user } = res.locals;
     const {link, description} = req.body;
+
     try {
-        
         await insertPost(user.id, link, description);
         const lastPostId = await getLastPostId(user.id);
         const hashtags = formatHashtags(description);
@@ -45,11 +33,13 @@ export async function createPost(req, res) {
 }
 
 export async function updateUserPost(req, res) {
+
     const { user } = res.locals;
     const { postId } = req.params;
     const { description } = req.body;
     
     console.log(user.id, postId, description);
+
     try {
         await updatePost(description, user.id, postId);
         const hashtags = formatHashtags(description);
@@ -70,6 +60,7 @@ export async function updateUserPost(req, res) {
 
 export async function getPosts(req, res) {
     const { user } = res.locals;
+    console.log(user);
     
     try {
         let limit = '';
@@ -88,12 +79,12 @@ export async function getPosts(req, res) {
             ${offset}
         `);
 
-        const result = resultPosts.rows.map((post)=>{
-            console.log(post)
+        const posts = resultPosts.rows.map((post)=>{
+            console.log(post);
             return {...post, isOwner: parseInt(post.userId) === user.id}
-        })
+        });
 
-        return res.send(result.reverse());
+        return res.send(posts);
 
     } catch (err) {
         console.log(err);

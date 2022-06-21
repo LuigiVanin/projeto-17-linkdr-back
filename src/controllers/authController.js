@@ -28,7 +28,8 @@ async function signin(req, res){
             const token = uuid()
             await userRepository.createSession(token, user.id)
             return res.send(
-                {token}
+                {token,
+                userId: user.id}
             )
         }
         else return res.sendStatus(422)

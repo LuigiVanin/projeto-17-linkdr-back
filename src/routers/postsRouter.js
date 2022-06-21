@@ -1,5 +1,4 @@
 import { Router } from "express";
-import authentication from "../middlewares/authentication.js";
 import validatePost from "../middlewares/postMiddlewares.js";
 import { validateToken } from "../middlewares/validation.js";
 import {
@@ -15,11 +14,11 @@ import {
 
 const postRouter = Router();
 
-postRouter.post("/post", authentication, createPost);
+postRouter.post("/post", validateToken, validatePost, createPost);
 
-postRouter.put("/post/:postId", authentication, updateUserPost);
+postRouter.put('/post/:postId', validateToken, updateUserPost);
 
-postRouter.get("/timeline", authentication, getPosts);
+postRouter.get("/timeline", validateToken, getPosts);
 
 //like / unlike
 postRouter.post("/like/:postId", likePost);

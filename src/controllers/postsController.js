@@ -70,7 +70,6 @@ export async function updateUserPost(req, res) {
 
 export async function getPosts(req, res) {
     const { user } = res.locals;
-    
     try {
         let limit = '';
         let offset = '';
@@ -216,7 +215,7 @@ export async function getNames(req, res) {
             }
         }
     }
-    catch (err) {
+    catch (err) { 
         console.log(err);
         return res.sendStatus(500);
     }

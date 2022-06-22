@@ -12,3 +12,16 @@ export async function insertFollower(req, res) {
         res.sendStatus(500);
     }
 }
+
+export async function removeFollower(req, res) {
+    const { user } = res.locals;
+    const { followerId } = req.params;
+
+    try {
+        await db.query(`DELETE FROM "followers" WHERE "userId" = $1 AND "friendId" = $2`, [user.id, followerId]);
+        res.sendStatus(200);
+    } catch (e) {
+        console.log(`erro ao remover seguidor: ${e}`);
+        res.sendStatus(500);
+    }
+}

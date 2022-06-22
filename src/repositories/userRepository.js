@@ -46,7 +46,7 @@ async function createSession(token, id) {
 async function getUserBySession(token) {
     return db.query(
         `
-    SELECT users.username, users.id FROM sessions
+    SELECT users.username, users.id as "userId", "imageUrl" FROM sessions
     JOIN users ON sessions."userId" = users.id
     WHERE sessions.token = $1;
     `,

@@ -16,3 +16,4 @@ if (process.env.MODE === "PROD") {
 const db = new Pool(configDatabase);
 
 export default db;
+

@@ -25,10 +25,11 @@ export async function getUser (req, res) {
 }
 
 export async function searchUser (req, res) {
-    const { user } = req.params;
+    const { user } = res.locals;
+    const { search } = req.params;
     
     try {
-        const checkUser = await db.query(`SELECT u.id, u.username, u."imageUrl" FROM users u WHERE username ILIKE $1`, [`%${user}%`]);
+        const checkUser = await db.query(`SELECT u.id, u.username, u."imageUrl" FROM users u WHERE username ILIKE $1`, [`%${search}%`]);
         console.log(checkUser.rows);
         res.status(200).send(checkUser.rows);
     } catch (e) {

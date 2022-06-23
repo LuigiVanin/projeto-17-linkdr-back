@@ -8,6 +8,6 @@ const userRouter = Router();
 userRouter.use(authentication);
 
 userRouter.get("/user/:id", getUser);
-userRouter.get("/search/:user", searchUser);
+userRouter.get("/search/:search", searchUser);
 
 export default userRouter;

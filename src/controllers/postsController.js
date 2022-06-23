@@ -38,7 +38,6 @@ export async function updateUserPost(req, res) {
     const { postId } = req.params;
     const { description } = req.body;
     
-    console.log(user.id, postId, description);
 
     try {
         await updatePost(description, user.id, postId);
@@ -60,7 +59,6 @@ export async function updateUserPost(req, res) {
 
 export async function getPosts(req, res) {
     const { user } = res.locals;
-    console.log(user);
     
     try {
         let limit = '';
@@ -80,15 +78,14 @@ export async function getPosts(req, res) {
         `);
 
         const posts = resultPosts.rows.map((post)=>{
-            console.log(post);
-            return {...post, isOwner: parseInt(post.userId) === user.id}
+           return {...post, isOwner: parseInt(post.userId) === user.id}
         });
 
-        return res.send(posts);
+        res.send(posts);
 
     } catch (err) {
         console.log(err);
-        return res.sendStatus(500);
+        res.sendStatus(500);
     }
 }
 

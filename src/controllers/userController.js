@@ -29,9 +29,22 @@ export async function searchUser (req, res) {
     const { search } = req.params;
     
     try {
-        const checkUser = await db.query(`SELECT u.id, u.username, u."imageUrl" FROM users u WHERE username ILIKE $1`, [`%${search}%`]);
-        console.log(checkUser.rows);
-        res.status(200).send(checkUser.rows);
+        let usersList = [];
+        let usersIdList = [];
+        const checkUser = await db.query(`
+        SELECT u.id, u.username, u."imageUrl", f."userId" FROM users u
+        LEFT JOIN followers f ON u.id = f."friendId"
+        WHERE u.username ILIKE $1
+        ORDER BY f."userId" != $2
+        `, [`%${search}%`,user.id]);
+        
+        checkUser.rows.forEach(userObj => {
+            if(!usersIdList.includes(userObj.id)) {
+                usersIdList.push(userObj.id);
+                usersList.push(userObj);
+            }
+        });
+        res.status(200).send(usersList);
     } catch (e) {
         console.log(`erro ao buscar usuario: ${e}`);
         res.sendStatus(500);

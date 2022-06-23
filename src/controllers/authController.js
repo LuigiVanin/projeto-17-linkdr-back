@@ -30,7 +30,7 @@ async function signin(req, res) {
         if (passwordValidation) {
             const token = uuid();
             await userRepository.createSession(token, user.id);
-            return res.send({token});
+            return res.send({token, userId: user.id});
         }
         else return res.sendStatus(422);
 

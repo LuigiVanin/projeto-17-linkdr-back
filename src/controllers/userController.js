@@ -27,42 +27,28 @@ export async function getUser (req, res) {
 }
 
 export async function searchUser (req, res) {
-    const { user } = req.params;
+    const { user } = res.locals;
+    const { search } = req.params;
     
     try {
+        let usersList = [];
+        let usersIdList = [];
         const checkUser = await db.query(`
-            SELECT u.id, u.username, u."imageUrl" 
-            FROM users u 
-            WHERE username ILIKE $1`,
-            [`%${user}%`]
-        );
-        console.log(checkUser.rows);
-        return res.status(200).send(checkUser.rows);
-
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
-    }
-}
-
-export async function checkFriends(req, res) {
-
-    const { user } = res.locals;
-
-    try {
-        const friends = await db.query(`
-            SELECT * FROM followers 
-            JOIN users ON followers."userId" = users.id
-            WHERE users.id = $1 
-        `, [user.id]);  
-        let result = false; 
-
-        if (friends.rowCount > 0) result = true;
-
-        return res.status(200).send(result);
-
-    } catch (error) {
-        console.log(error);
-        return res.sendStatus(500);
+        SELECT u.id, u.username, u."imageUrl", f."userId" FROM users u
+        LEFT JOIN followers f ON u.id = f."friendId"
+        WHERE u.username ILIKE $1
+        ORDER BY f."userId" != $2
+        `, [`%${search}%`,user.id]);
+        
+        checkUser.rows.forEach(userObj => {
+            if(!usersIdList.includes(userObj.id)) {
+                usersIdList.push(userObj.id);
+                usersList.push(userObj);
+            }
+        });
+        res.status(200).send(usersList);
+    } catch (e) {
+        console.log(`erro ao buscar usuario: ${e}`);
+        res.sendStatus(500);
     }
 }

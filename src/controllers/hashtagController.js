@@ -1,10 +1,12 @@
 import {
-    getHashtagsByName, getTrendingHashtags, insertHashtag
+    getHashtagsByName,
+    getTrendingHashtags,
+    insertHashtag,
 } from "../repositories/hashtagRepository.js";
 
 const getHashtag = async (req, res) => {
     let { hashtag } = req.params;
-
+    console.log("requisição aqui: ", hashtag);
     try {
         const hashtagPostsResult = await getHashtagsByName(hashtag);
         const { rows: hashtags } = hashtagPostsResult;
@@ -27,14 +29,15 @@ const getTrending = async (_, res) => {
     }
 };
 
-function formatHashtags(text){
-    const regex = /((?:^|\s)(?:#[a-z\d -]+))/gi
-    const splittedText = text.split(regex)
+function formatHashtags(text) {
+    const regex = /((?:^|\s)(?:#[a-z\d -]+))/gi;
+    const splittedText = text.split(regex);
 
-    return splittedText.filter(Boolean).map((string)=>{
-        if(string.includes('#')) return string.replace("#", "").replaceAll(' ', '')
-        //hashtags devem estar no final da frase 
-    })
+    return splittedText.filter(Boolean).map((string) => {
+        if (string.includes("#"))
+            return string.replace("#", "").replaceAll(" ", "");
+        //hashtags devem estar no final da frase
+    });
 }
 
 export { getHashtag, getTrending, formatHashtags };

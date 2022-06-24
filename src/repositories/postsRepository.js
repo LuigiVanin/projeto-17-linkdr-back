@@ -114,6 +114,13 @@ const deleteHashtagId = async (postId) => {
     );
 }
 
+const deleteReposts = async (postId) =>{
+    return db.query(`
+    DELETE FROM reposts WHERE "postId" = $1
+    `,
+    [postId])
+}
+
 const deletePostId = async (postId) => {
     return db.query(
         `
@@ -123,6 +130,17 @@ const deletePostId = async (postId) => {
     );
 }
 
+const getAllReposts = async () => {
+    return db.query(`
+    select reposts."postId", reposts."userPosted" as "userId", aut."imageUrl" ,posts.link, posts.description, aut.username as username, users.username as "sharedBy", reposts."createdAt" as "postCreationDate"
+    from reposts
+    join posts on posts.id = reposts."postId"
+    join users aut on aut.id = reposts."userPosted"
+    join users on users.id = reposts."userId"
+    ORDER BY "postCreationDate" DESC
+    `)
+}
 
 
-export { validToken, insertPost, getLastPostId, updatePost, checkLike, likePostId, dislikePostId, countLikes, getLikeName, checkAuthor, deleteLikesId, deleteHashtagId, deletePostId };
+
+export { validToken, insertPost, getLastPostId, updatePost, checkLike, likePostId, dislikePostId, countLikes, getLikeName, checkAuthor, deleteLikesId, deleteHashtagId, deleteReposts, deletePostId, getAllReposts };

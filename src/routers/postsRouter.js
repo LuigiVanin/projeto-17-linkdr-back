@@ -1,36 +1,22 @@
+// Rota de posts
+
 import { Router } from "express";
-import { validateToken } from "../middlewares/validation.js";
-import {
-    createPost,
-    updateUserPost,
-    getPosts,
-    likePost,
-    getLiked,
-    getLikes,
-    getNames,
-    deletePost,
+import { authentication } from "../middlewares/authMiddleware.js";
+import validatePost from "../middlewares/postMiddlewares.js";
+import { 
+    createPost, updateUserPost, getPosts, deletePost, getRepost, postRepost 
 } from "./../controllers/postsController.js";
 
 const postRouter = Router();
+//postRouter.use(authentication);
 
-postRouter.post("/post", validateToken, createPost);
+postRouter.post("/post", authentication, validatePost, createPost);
+postRouter.get("/timeline", authentication,  getPosts);
 
-postRouter.put('/post/:postId', validateToken, updateUserPost)
+postRouter.put("/post/:postId", authentication,  updateUserPost);
+postRouter.delete("/posts/:postId", authentication,  deletePost);
 
-postRouter.get("/timeline", validateToken, getPosts);
-
-//like / unlike
-postRouter.post("/like/:postId", likePost);
-postRouter.get("/liked/:postId", getLiked);
-
-//mostrar curtidas (react-tooltip)
-postRouter.get("/likes/:postId", getLikes);
-postRouter.get("/names/:postId", getNames);
-
-//editPost (focus useRef (react))
-// postRouter.put('/posts/:postId', editPost);
-
-//deletePost (react-modal/dialog)
-postRouter.delete("/posts/:postId", deletePost);
+postRouter.get("/repost/:postId", authentication, getRepost);
+postRouter.post("/repost/:postId", authentication, postRepost);
 
 export default postRouter;

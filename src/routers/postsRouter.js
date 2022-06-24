@@ -8,25 +8,25 @@ import {
 } from "./../controllers/postsController.js";
 
 const postRouter = Router();
-postRouter.use(authentication);
+//postRouter.use(authentication);
 
-postRouter.post("/post", validatePost, createPost);
-postRouter.get("/timeline", getPosts);
+postRouter.post("/post", authentication, validatePost, createPost);
+postRouter.get("/timeline", authentication, getPosts);
 
-postRouter.put("/post/:postId", updateUserPost);
+postRouter.put("/post/:postId", authentication, updateUserPost);
 
 //like / unlike
-postRouter.post("/like/:postId", likePost);
-postRouter.get("/liked/:postId", getLiked);
+postRouter.post("/like/:postId", authentication, likePost);
+postRouter.get("/liked/:postId", authentication, getLiked);
 
 //mostrar curtidas (react-tooltip)
-postRouter.get("/likes/:postId", getLikes);
-postRouter.get("/names/:postId", getNames);
+postRouter.get("/likes/:postId", authentication, getLikes);
+postRouter.get("/names/:postId", authentication, getNames);
 
 //editPost (focus useRef (react))
 // postRouter.put('/posts/:postId', editPost);
 
 //deletePost (react-modal/dialog)
-postRouter.delete("/posts/:postId", deletePost);
+postRouter.delete("/posts/:postId", authentication, deletePost);
 
 export default postRouter;

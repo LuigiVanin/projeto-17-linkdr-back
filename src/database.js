@@ -19,11 +19,11 @@ const db = new Pool(configDatabase);
 
 // conexao db para teste local:-----------------
 const db = new Pool({
-  host: 'localhost',
-  port: 5432,
+  host: process.env.HOST,
+  port: process.env.SQL_PORT,
   user: 'postgres',
-  password: 1506,
-  database: 'linkr'
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE
 });
 // ---------------------------------------------
 

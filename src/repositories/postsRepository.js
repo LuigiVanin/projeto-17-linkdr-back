@@ -108,7 +108,7 @@ const deleteLikesId = async (postId) => {
 const deleteHashtagId = async (postId) => {
     return db.query(
         `
-        DELETE FROM "postsHastags" WHERE "postId" = $1
+        DELETE FROM "postsHashtags" WHERE "postId" = $1
         `,
         [postId]
     );
@@ -132,11 +132,13 @@ const deletePostId = async (postId) => {
 
 const getAllReposts = async () => {
     return db.query(`
-    select reposts."postId", reposts."userPosted" as "userId", aut."imageUrl" ,posts.link, posts.description, aut.username as username, users.username as "sharedBy", reposts."createdAt" as "postCreationDate"
+    select reposts."postId", reposts."userPosted" as "userId", aut."imageUrl" ,posts.link, posts.description, aut.username as username, users.username as "sharedBy", reposts."createdAt" as "postCreationDate", COUNT(likes.id) as "likesCount"
     from reposts
     join posts on posts.id = reposts."postId"
     join users aut on aut.id = reposts."userPosted"
     join users on users.id = reposts."userId"
+    left join likes on likes."postId" = reposts."postId"
+    GROUP BY reposts."postId", reposts."userPosted", aut."imageUrl" ,posts.link, posts.description, aut.username, users.username, reposts."createdAt"
     ORDER BY "postCreationDate" DESC
     `)
 }

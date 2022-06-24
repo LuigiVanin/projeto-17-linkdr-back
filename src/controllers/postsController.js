@@ -2,7 +2,7 @@ import db from '../database.js';
 import { createPostHashtag, findHashtag, insertHashtag } from '../repositories/hashtagRepository.js';
 import {
     validToken, updatePost, checkAuthor,
-    deleteLikesId, //deleteHashtagId, 
+    deleteLikesId, deleteHashtagId, 
     deletePostId, insertPost, getLastPostId , deleteReposts, getAllReposts
 } from "../repositories/postsRepository.js";
 import { formatHashtags } from './hashtagController.js';
@@ -133,7 +133,7 @@ export async function deletePost(req, res) {
             return res.status(401).json({ error: 'Você não tem permissão para deletar esse post' });
         }
         await deleteLikesId(parseInt(postId));
-        // await deleteHashtagId(parseInt(postId));
+        await deleteHashtagId(parseInt(postId));
         await deleteReposts(parseInt(postId));
         await deletePostId(parseInt(postId));
         res.status(200).send("Post deletado com sucesso!");

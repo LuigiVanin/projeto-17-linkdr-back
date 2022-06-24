@@ -59,17 +59,20 @@ export async function updateUserPost(req, res) {
 
 export async function getPosts(req, res) {
     const { user } = res.locals;
-    
     try {
         let limit = '';
         let offset = '';
+        let queryDate = ''
         if (req.query.limit) limit = `LIMIT ${req.query.limit}`;
         if (req.query.offset) offset = `OFFSET ${req.query.offset}`;
+        if (req.query.queryDate) queryDate = `AND (posts."createdAt" BETWEEN DATE('${req.query.queryDate}') AND now())`
+
+        console.log(queryDate)
 
         const resultPosts = await db.query(`
             SELECT posts.id as "postId", users.id as "userId", users."imageUrl", users.username, posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
             FROM posts
-            JOIN users ON posts."userId" = users.id
+            JOIN users ON posts."userId" = users.id ${queryDate}
             LEFT JOIN likes ON likes."postId" = posts.id
             GROUP BY users.id, users.username, posts.id, "postCreationDate"
             ORDER BY "postCreationDate" DESC

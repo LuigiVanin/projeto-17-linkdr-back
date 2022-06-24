@@ -10,7 +10,7 @@ async function getUrlMetadata(req,res){
 
         res.status(200).send({title, description, image})
     } catch (error) {
-        
+        res.sendStatus(500)
     }
 }
 

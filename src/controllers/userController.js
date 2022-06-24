@@ -9,9 +9,9 @@ export async function getUser (req, res) {
             FROM posts
             JOIN users ON posts."userId" = users.id
             LEFT JOIN likes ON likes."postId" = posts.id
+            WHERE users.id = $1
             GROUP BY users.id, users.username, posts.id, "postCreationDate"
             ORDER BY "postCreationDate" DESC
-            WHERE u.id = $1
         `, [id]);
         const userById = await db.query(`SELECT username AS name FROM users WHERE id=$1`,[id]);
         const obj = {
@@ -39,7 +39,7 @@ export async function searchUser (req, res) {
         WHERE u.username ILIKE $1
         ORDER BY f."userId" != $2
         `, [`%${search}%`,user.id]);
-        
+
         checkUser.rows.forEach(userObj => {
             if(!usersIdList.includes(userObj.id)) {
                 usersIdList.push(userObj.id);
@@ -50,5 +50,27 @@ export async function searchUser (req, res) {
     } catch (e) {
         console.log(`erro ao buscar usuario: ${e}`);
         res.sendStatus(500);
+    }
+}
+
+export async function checkFriends(req, res) {
+
+    const { user } = res.locals;
+
+    try {
+        const friends = await db.query(`
+            SELECT * FROM followers 
+            JOIN users ON followers."userId" = users.id
+            WHERE users.id = $1 
+        `, [user.id]);  
+        let result = false; 
+
+        if (friends.rowCount > 0) result = true;
+
+        return res.status(200).send(result);
+
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
     }
 }

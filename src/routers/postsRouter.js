@@ -14,11 +14,9 @@ postRouter.post("/post", authentication, validatePost, createPost);
 postRouter.get("/timeline", authentication,  getPosts);
 
 postRouter.put("/post/:postId", authentication,  updateUserPost);
-
 postRouter.delete("/posts/:postId", authentication,  deletePost);
 
 postRouter.get("/repost/:postId", authentication, getRepost);
-
 postRouter.post("/repost/:postId", authentication, postRepost);
 
 export default postRouter;

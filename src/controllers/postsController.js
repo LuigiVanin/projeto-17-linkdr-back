@@ -2,7 +2,7 @@ import db from '../database.js';
 import { createPostHashtag, findHashtag, insertHashtag } from '../repositories/hashtagRepository.js';
 import {
     validToken, updatePost, checkAuthor,
-    deleteLikesId, deleteHashtagId, 
+    deleteLikesId, //deleteHashtagId, 
     deletePostId, insertPost, getLastPostId , deleteReposts, getAllReposts
 } from "../repositories/postsRepository.js";
 import { formatHashtags } from './hashtagController.js';
@@ -66,6 +66,18 @@ export async function getPosts(req, res) {
         if (req.query.limit) limit = `LIMIT ${req.query.limit}`;
         if (req.query.offset) offset = `OFFSET ${req.query.offset}`;
 
+        /*const resultPosts = await db.query(`
+            SELECT posts.id as "postId", users.id as "userId", users."imageUrl", users.username, posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
+            FROM posts
+            JOIN users ON posts."userId" = users.id
+            LEFT JOIN likes ON likes."postId" = posts.id
+            JOIN followers ON posts."userId" = followers."friendId"
+            GROUP BY users.id, users.username, posts.id, "postCreationDate"
+            ORDER BY "postCreationDate" DESC
+            ${limit}
+            ${offset}
+        `);*/
+
         const resultPosts = await db.query(`
             SELECT posts.id as "postId", users.id as "userId", users."imageUrl", users.username, posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
             FROM posts
@@ -121,7 +133,7 @@ export async function deletePost(req, res) {
             return res.status(401).json({ error: 'Você não tem permissão para deletar esse post' });
         }
         await deleteLikesId(parseInt(postId));
-        await deleteHashtagId(parseInt(postId));
+        // await deleteHashtagId(parseInt(postId));
         await deleteReposts(parseInt(postId));
         await deletePostId(parseInt(postId));
         res.status(200).send("Post deletado com sucesso!");

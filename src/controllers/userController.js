@@ -6,12 +6,14 @@ export async function getUser (req, res) {
     
     try {
         const checkUser = await db.query(`
+
             SELECT u."imageUrl", u.username, p.id as "postId", p."userId", p.link, p.description, h.name AS hashtag
             FROM posts p
             JOIN users u ON p."userId" = u.id
             LEFT JOIN "postsHashtags" ph ON p.id = ph."postId"
             LEFT JOIN hashtags h ON ph."hashtagId" = h.id
             WHERE u.id = $1
+
         `, [id]);
         const userById = await db.query(`SELECT username AS name, "imageUrl" FROM users WHERE id=$1`,[id]);
         const isFollowingData = await db.query(`SELECT * FROM followers WHERE "userId"=$1 AND "friendId"=$2`, [user.id, id]);
@@ -25,11 +27,13 @@ export async function getUser (req, res) {
             posts: checkUser.rows,
             postId: checkUser.rows[0]?.postId
         }
+
         console.log(obj)
         res.status(200).send(obj);
     } catch (e) {
         console.log(`erro ao buscar usuario: ${e}`);
         res.sendStatus(500);
+
     }
 }
 
@@ -46,7 +50,7 @@ export async function searchUser (req, res) {
         WHERE u.username ILIKE $1
         ORDER BY f."userId" != $2
         `, [`%${search}%`,user.id]);
-        
+
         checkUser.rows.forEach(userObj => {
             if(!usersIdList.includes(userObj.id)) {
                 usersIdList.push(userObj.id);
@@ -58,5 +62,27 @@ export async function searchUser (req, res) {
     } catch (e) {
         console.log(`erro ao buscar usuario: ${e}`);
         res.sendStatus(500);
+    }
+}
+
+export async function checkFriends(req, res) {
+
+    const { user } = res.locals;
+
+    try {
+        const friends = await db.query(`
+            SELECT * FROM followers 
+            JOIN users ON followers."userId" = users.id
+            WHERE users.id = $1 
+        `, [user.id]);  
+        let result = false; 
+
+        if (friends.rowCount > 0) result = true;
+
+        return res.status(200).send(result);
+
+    } catch (error) {
+        console.log(error);
+        return res.sendStatus(500);
     }
 }

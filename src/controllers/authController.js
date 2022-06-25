@@ -4,7 +4,7 @@ import {v4 as uuid} from 'uuid';
 import userRepository from '../repositories/userRepository.js';
 
 async function signup(req, res) {
-    const user = req.body 
+    const user = req.body;
     const { username, email, password, imageUrl } = user;
 
     try {
@@ -47,8 +47,8 @@ async function logout(req, res) {
 
     try {
         const session = await db.query(`
-            DELETE FROM sessions WHERE token = '${token}'
-        `);
+            DELETE FROM sessions WHERE token = $1
+        `, [token]);
         return res.status(200).send(session);
 
     } catch(err) {

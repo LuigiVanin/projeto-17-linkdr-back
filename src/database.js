@@ -15,5 +15,14 @@ if(process.env.MODE === "PROD") {
 }
 const db = new Pool(configDatabase);
 
-export default db;
+/* conexao db para teste local:-----------------
+const db = new Pool({
+  host: process.env.HOST,
+  port: process.env.SQL_PORT,
+  user: 'postgres',
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE
+});
+/---------------------------------------------*/ 
 
+export default db;

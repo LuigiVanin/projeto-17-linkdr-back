@@ -7,8 +7,8 @@ import { getUser, searchUser } from "../controllers/userController.js";
 const userRouter = Router();
 //userRouter.use(authentication);
 
-userRouter.get("/user/:id", getUser);
-userRouter.get("/search/:search", searchUser);
+userRouter.get("/user/:id", authentication, getUser);
+userRouter.get("/search/:search", authentication, searchUser);
 
 
 export default userRouter;

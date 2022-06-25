@@ -4,9 +4,9 @@ import { insertFollower, removeFollower } from '../controllers/followersControll
 import { authentication } from "../middlewares/authMiddleware.js";
 
 const followersRouter = Router();
-followersRouter.use(authentication);
+//followersRouter.use(authentication);
 
-followersRouter.post('/follow/:followerId', insertFollower);
-followersRouter.delete('/unfollow/:followerId', removeFollower);
+followersRouter.post('/follow/:followerId', authentication, insertFollower);
+followersRouter.delete('/unfollow/:followerId', authentication, removeFollower);
 
 export default followersRouter;

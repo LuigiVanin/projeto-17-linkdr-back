@@ -139,7 +139,7 @@ export async function getRepost(req, res){
         SELECT * FROM reposts WHERE "postId" = $1`, [postId])
         res.status(200).send(result)
     }
-    catch{
+    catch(err){
         console.log(err);
         return res.sendStatus(500);
     }
@@ -157,7 +157,7 @@ export async function postRepost(req,res){
         res.status(200).send(result)
 
     }
-    catch{
+    catch(err){
         console.log(err);
         return res.sendStatus(500);
     }

@@ -2,7 +2,7 @@
 
 import { Router } from "express";
 import { authentication } from "../middlewares/authMiddleware.js";
-import { getUser, searchUser, checkFriends } from "../controllers/userController.js";
+import { getUser, searchUser } from "../controllers/userController.js";
 
 const userRouter = Router();
 //userRouter.use(authentication);
@@ -10,7 +10,7 @@ const userRouter = Router();
 userRouter.get("/user/:id", authentication, getUser);
 userRouter.get("/search/:search", authentication, searchUser);
 
-userRouter.get("/friends", authentication, checkFriends);
+userRouter.get("/friends", authentication);
 
 
 export default userRouter;

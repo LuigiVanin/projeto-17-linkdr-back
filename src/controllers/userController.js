@@ -2,21 +2,30 @@ import db from '../database.js';
 
 export async function getUser (req, res) {
     const { id } = req.params;
+    const { user } = res.locals;
     
     try {
         const checkUser = await db.query(`
-            SELECT posts.id as "postId", users.id as "userId", users."imageUrl", users.username, posts.link, posts."createdAt" as "postCreationDate", posts.description, COUNT(likes.id) as "likesCount"
-            FROM posts
-            JOIN users ON posts."userId" = users.id
-            LEFT JOIN likes ON likes."postId" = posts.id
-            WHERE users.id = $1
-            GROUP BY users.id, users.username, posts.id, "postCreationDate"
-            ORDER BY "postCreationDate" DESC
-        `, [id]);
-        const userById = await db.query(`SELECT username AS name FROM users WHERE id=$1`,[id]);
+        SELECT u."imageUrl", u.username, p.id as "postId", p."userId", p.link, p.description, h.name AS hashtag
+        FROM posts p
+        JOIN users u ON p."userId" = u.id
+        LEFT JOIN "postsHashtags" ph ON p.id = ph."postId"
+        LEFT JOIN hashtags h ON ph."hashtagId" = h.id
+        WHERE u.id = $1
+    `, [id]);
+    const userById = await db.query(`SELECT username AS name, "imageUrl" FROM users WHERE id=$1`,[id]);
+
+        const isFollowingData = await db.query(`SELECT * FROM followers WHERE "userId"=$1 AND "friendId"=$2`, [user.id, id]);
+        
+        const isFollowing = (isFollowingData.rowCount !== 0);
+
+   
         const obj = {
             name: userById.rows[0].name,
-            posts: checkUser.rows
+            imageUrl: userById.rows[0].imageUrl, 
+            isFollowing: isFollowing,
+            posts: checkUser.rows,
+            postId: checkUser.rows[0]?.postId || 0
         }
         return res.status(200).send(obj);
 
@@ -39,13 +48,14 @@ export async function searchUser (req, res) {
         WHERE u.username ILIKE $1
         ORDER BY f."userId" != $2
         `, [`%${search}%`,user.id]);
-
+        
         checkUser.rows.forEach(userObj => {
             if(!usersIdList.includes(userObj.id)) {
                 usersIdList.push(userObj.id);
                 usersList.push(userObj);
             }
         });
+        console.log(usersList)
         res.status(200).send(usersList);
     } catch (e) {
         console.log(`erro ao buscar usuario: ${e}`);

@@ -9,6 +9,8 @@ const userRouter = Router();
 
 userRouter.get("/user/:id", authentication, getUser);
 userRouter.get("/search/:search", authentication, searchUser);
+
 userRouter.get("/friends", authentication, checkFriends);
+
 
 export default userRouter;
